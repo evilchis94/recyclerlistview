@@ -298,7 +298,36 @@ export default class ViewabilityTracker {
     }
 
     private _itemIntersectsVisibleWindow(startBound: number, endBound: number): boolean {
-        return this._itemIntersectsWindow(this._visibleWindow, startBound, endBound);
+        // return this._itemIntersectsWindow(this._visibleWindow, startBound, endBound);
+        const visibleHeight: number = this._visibleWindow.end - this._visibleWindow.start;
+        const itemHeight: number = endBound - startBound;
+        let needsToCover: number = 60;
+        let mode: string = "view";
+
+        if (itemHeight < ((visibleHeight / 3) * 2)) {
+            mode = "item";
+            needsToCover += 20;
+        }
+
+        //Item is completely inside the visible window or beyond the visible window
+        if ((startBound > this._visibleWindow.start && endBound < this._visibleWindow.end)
+            || this._isItemBoundsBeyondWindow(this._visibleWindow, startBound, endBound)) {
+            return true;
+        } else if (this._isItemInBounds(this._visibleWindow, startBound)) { //If item start bound is in visible window
+            const visibleItemHeight: number = this._visibleWindow.end - Math.max(this._visibleWindow.start, startBound);
+            const visiblePixels: number = Math.max(0, visibleItemHeight);
+            const percentage: number = 100 * (visiblePixels / (mode === "view" ? visibleHeight : itemHeight));
+
+            return percentage >= needsToCover;
+        } else if (this._isItemInBounds(this._visibleWindow, endBound)) { //If item end bound is in visible window
+            const visibleItemHeight: number = Math.min(this._visibleWindow.end, endBound) - Math.max(this._visibleWindow.start, 0);
+            const visiblePixels: number = Math.max(0, visibleItemHeight);
+            const percentage: number = 100 * (visiblePixels / (mode === "view" ? visibleHeight : itemHeight));
+
+            return percentage >= needsToCover;
+        }
+
+        return false;
     }
 
     private _updateTrackingWindows(offset: number, correction: WindowCorrection): void {
