@@ -302,10 +302,10 @@ export default class ViewabilityTracker {
         const visibleHeight: number = this._visibleWindow.end - this._visibleWindow.start;
         const itemHeight: number = endBound - startBound;
         let needsToCover: number = 60;
-        let mode: string = "view";
+        let mode: string = 'view';
 
         if (itemHeight < ((visibleHeight / 3) * 2)) {
-            mode = "item";
+            mode = 'item';
             needsToCover += 20;
         }
 
